@@ -1,0 +1,7 @@
+{
+  "version": "0.0.9",
+  "name": "csgo-matchup",
+  "dependencies": {
+    "slash-create": "^5.7.0"
+  }
+}
