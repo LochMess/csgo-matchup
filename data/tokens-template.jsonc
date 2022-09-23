@@ -1,0 +1,19 @@
+/*
+ Example file of the tokens.json file that is used for storing unused privacy pass tokens.
+*/
+[
+  {
+    "input": [
+      1,
+      2,
+      3
+    ],
+    "factor": "Lorem ipsum dolor sit amet",
+    "blindedPoint": "Lorem ipsum dolor sit amet",
+    "unblindedPoint": "Lorem ipsum dolor sit amet",
+    "signed": {
+      "blindedPoint": "Lorem ipsum dolor sit amet",
+      "unblindedPoint": "Lorem ipsum dolor sit amet"
+    }
+  }
+]

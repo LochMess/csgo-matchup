@@ -1,5 +1,3 @@
-/data
-
 # Logs
 logs
 *.log
@@ -86,3 +84,11 @@ typings/
 # pm2
 .pm2
 .pm2.bak
+
+# config
+config/*.json
+!config/*-template.json
+
+# data
+data/*.json
+!data/*-template.jsonc

@@ -1,0 +1,6 @@
+[
+    {
+        "name": "<Name does not matter this is for your own reference>",
+        "steamId": "<steam ID of player matching format and structure of CSGO status command output>"
+    }
+]

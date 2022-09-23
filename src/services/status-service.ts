@@ -1,5 +1,9 @@
-import {SlashCommand, CommandOptionType} from 'slash-create'
-import clc from 'cli-color'
+import fs from 'fs'
+const path = require('path')
+
+const BASE_URL = 'https://csgostats.gg/player/multi?'
+
+const ASSOCIATES_FILE = 'config/associates.json'
 
 class Player {
   name: string
@@ -39,14 +43,49 @@ function parseStatusToPlayers(statusOutput: string): Player[] {
   )
 }
 
+type Associate = {
+  name: string
+  steamId: string
+}
+
+function getAssociates(): Associate[] {
+  try {
+    const data = fs.readFileSync(ASSOCIATES_FILE, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    console.error('Something went wrong reading associates file: ', error)
+    throw error
+  }
+}
+
+function teamPlayers(players: Player[]): Player[] {
+  const associates = getAssociates()
+  return [...players].sort((a: Player, b: Player): number => {
+    const aExists: boolean =
+      associates.find(associate => associate.steamId === a.id) !== undefined
+    const bExists: boolean =
+      associates.find(associate => associate.steamId === b.id) !== undefined
+
+    if ((aExists && bExists) || (!aExists && !bExists)) {
+      return 0
+    } else if (aExists) {
+      return -1
+    } else if (bExists) {
+      return 1
+    }
+    return 0
+  })
+}
+
 /**
  * Order of players in query parameters determines teams
  * @param players
  * @returns URI encoded string of players as query parameters
  */
 function playersToQueryParams(players: Player[]): string {
+  const sortedPlayers = teamPlayers(players)
   return encodeURI(
-    players
+    sortedPlayers
       .map(
         (player, index) =>
           `data[${index}][0]=${player?.name}&data[${index}][2]=${player?.ping}&data[${index}][1]=${player?.id}`,
@@ -55,36 +94,8 @@ function playersToQueryParams(players: Player[]): string {
   )
 }
 
-const baseUrl = 'https://csgostats.gg/player/multi?'
-
-export default class CsgoCommand extends SlashCommand {
-  constructor(creator) {
-    super(creator, {
-      name: 'csgo',
-      description: 'Gets ranks of players in game.',
-      options: [
-        {
-          type: CommandOptionType.STRING,
-          name: 'status',
-          description: 'Output of "status" command from CSGO console',
-        },
-      ],
-    })
-
-    this.filePath = __filename
-  }
-
-  async run(ctx) {
-    console.log(
-      clc.green('Running csgo command for'),
-      clc.red(`${ctx.user.username}#${ctx.user.discriminator}`),
-    )
-    return ctx.options.status
-      ? `<@${
-          ctx.user.id
-        }> here is your game! [csgostats.gg](${baseUrl}${playersToQueryParams(
-          parseStatusToPlayers(ctx.options.status),
-        )})`
-      : `Sup, <@${ctx.user.id}>! Please provide a CSGO console status output for me to assess 👍`
-  }
+export function getGameUrl(statusOutput: string): string {
+  return `${BASE_URL}${playersToQueryParams(
+    parseStatusToPlayers(statusOutput),
+  )}`
 }
